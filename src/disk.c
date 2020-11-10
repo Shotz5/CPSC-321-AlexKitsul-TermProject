@@ -3,13 +3,13 @@
 #include"disk.h"
 
 struct block records[2000];
+int recordpos = 0;
 
 int disk_write(struct block data) {
-
-    return 0;
+    records[recordpos] = data;
+    return recordpos++;
 }
 
-int disk_read(struct block data) {
-
-    return 0;
+struct block disk_read(int record) {
+    return records[record];
 }

@@ -1,8 +1,8 @@
+#define BLOCK_SIZE 128
+
 struct block {
-    char block[128];
+    unsigned char block[BLOCK_SIZE];
 };
 
-int main();
-int disk();
 int disk_write(struct block data);
-int disk_read(struct block data);
+struct block disk_read(int record);
