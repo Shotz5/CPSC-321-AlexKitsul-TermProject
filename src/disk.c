@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<stdint.h>
 #include"disk.h"
 
 struct block records[MAX_RECORDS]; // Big bulk of blocks
@@ -26,3 +27,8 @@ int disk_read(int record, struct block* passback) {
     *passback = records[record];
     return 0;
 }
+
+/*int disk_read(struct superblock* passback) {
+    *passback = records[0];
+    return 0;
+}*/

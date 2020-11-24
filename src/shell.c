@@ -6,8 +6,10 @@
 #include<fcntl.h>
 #include<sys/wait.h>
 #include<string.h>
+#include<stdint.h>
 #include"shell.h"
 #include"disk.h"
+#include"partition.h"
 
 #define LGREEN "\x1B[1;32m"
 #define YELLOW "\x1B[0;33m"
@@ -30,25 +32,7 @@ int main(int argc, char *argv[]) {
                 // ... and were not tested
                 // CD is special-case handled solely in C, everything else handled by syscalls
 
-                struct block testBlock;
-                for (int i = 0; i < 128; i++) {
-                    testBlock.block[i] = 0xaa; // The noise I hear in my hend while programming
-                }
-
-                int record = 0;
-                struct block readBlock;
-
-                if (strcmp(tokens[0], "disk_write") == 0) {
-                    record = disk_write(testBlock);
-                } else if (strcmp(tokens[0], "disk_read") == 0) {
-                    disk_read(record, &readBlock);
-                    for (int i = 0; i < 128; i++) {
-                        printf("%02x ", readBlock.block[i]);
-                    }
-                    printf("\n");
-                }
-
-                
+                partition();
 
                 // Free everything we did out of RAM
                 free(input);
