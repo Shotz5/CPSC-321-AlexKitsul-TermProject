@@ -1,5 +1,4 @@
-// REPURPOSED ASSIGNMENT 1 SHELL FOR USE IN THIS
-
+// CODE SOURCED FROM MY ASSIGNMENT 1 PROJECT, HEAVILY MODIFIED
 #include<stdio.h>
 #include<stdlib.h>
 #include<unistd.h>
@@ -9,14 +8,12 @@
 #include"shell.h"
 #include"disk.h"
 
-#define LGREEN "\x1B[1;32m"
-#define YELLOW "\x1B[0;33m"
-#define BLUE "\x1B[0;34m"
-#define RED "\x1B[0;31m"
-#define RESET "\x1B[0m"
-
 // Main driver for application
 int main(int argc, char *argv[]) {
+    
+    // Parition our 'hard drive'
+    partition();
+
     // Begin normal shell
     while(1) {
         printWorkingDir();
@@ -26,29 +23,14 @@ int main(int argc, char *argv[]) {
         if (input != NULL) {
             char **tokens = parseInput(input);
             if (tokens != NULL) {
-                // Theoretically with the way this is designed other syscalls (env, pf, etc.) can occur, unexpected results may occur...
-                // ... and were not tested
-                // CD is special-case handled solely in C, everything else handled by syscalls
-
-                struct block testBlock;
-                for (int i = 0; i < 128; i++) {
-                    testBlock.block[i] = 0xaa; // The noise I hear in my hend while programming
+                if (strcmp(tokens[0], "make_file") == 0) {
+                    make_file();
+                } else if (strcmp(tokens[0], "write_file") == 0) {
+                    write_file(tokens[1], atoi(tokens[2]));
+                    printf("Wrote %s to file %s\n", tokens[1], tokens[2]);
+                } else if (strcmp(tokens[0], "delete_file") == 0) {
+                    delete_file(atoi(tokens[1]));
                 }
-
-                int record = 0;
-                struct block readBlock;
-
-                if (strcmp(tokens[0], "disk_write") == 0) {
-                    record = disk_write(testBlock);
-                } else if (strcmp(tokens[0], "disk_read") == 0) {
-                    disk_read(record, &readBlock);
-                    for (int i = 0; i < 128; i++) {
-                        printf("%02x ", readBlock.block[i]);
-                    }
-                    printf("\n");
-                }
-
-                
 
                 // Free everything we did out of RAM
                 free(input);
@@ -184,106 +166,4 @@ int count(char *input) {
     }
 
     return words;
-}
-
-// Executes the Syscall supplied by the input with args provided
-int exefunc(char **arguments) {
-
-    int pos = 0;
-    int overwrite = 0;
-    int append = 0;
-    int terminal;
-
-    // If > or >> are encountered, obtain file name for output and remove > or >> from arguments
-    while(arguments[pos] != NULL) {
-        if (strcmp(arguments[pos], ">") == 0) {
-            overwrite = 1;
-            if (arguments[pos + 1] == NULL) {
-                printf("Invalid file name\n");
-                return -1;
-            }
-            // Removes '>'
-            free(arguments[pos]);
-            arguments[pos] = arguments[pos + 1];
-            arguments[pos + 1] = NULL;
-            break;
-        } else if (strcmp(arguments[pos], ">>") == 0) {
-            append = 1;
-            if (arguments[pos + 1] == NULL) {
-                printf("Invalid file name\n");
-                return -1;
-            }
-            // Removes '>>'
-            free(arguments[pos]);
-            arguments[pos] = arguments[pos + 1];
-            arguments[pos + 1] = NULL;
-            break;
-        } else {
-            pos++;
-        }
-    }
-
-    // Open or create a file based on input from above, set STDOUT to file
-    if (overwrite == 1 || append == 1) {
-        int file = -1;
-        if (overwrite == 1) {
-            file = open(arguments[pos], O_RDWR | O_CREAT | O_TRUNC, 0666);
-        } else if (append == 1) {
-            file = open(arguments[pos], O_RDWR | O_CREAT | O_APPEND, 0666);
-        }
-
-        if (file == -1) {
-            printf("Could not open file\n");
-            return -1;
-        }
-
-        free(arguments[pos]);
-        arguments[pos] = NULL;
-
-        terminal = dup(STDOUT_FILENO); // Saves termindal STDOUT filenumber
-        dup2(file, STDOUT_FILENO); // Sets STDOUT filenumber to file
-        close(file);
-    }
-
-    // Fork out and execute, main thread waits for child to finish then continues
-    // There is a bug where upon an invalid command, you have to type exit multiple times
-    // Only applicable for invalid input though, don't know why
-    int status;
-    if (fork() == 0) {
-        execvp(arguments[0], arguments);
-        exit(EXIT_SUCCESS);
-    } else {
-        wait(&status);
-        if (overwrite == 1 || append == 1) {
-            dup2(terminal, STDOUT_FILENO);
-            close(terminal);
-        }
-    }
-    return 0;
-}
-
-// Changes current working directory to one requested by user
-int cd(char **arguments) {
-    // If no dir given or ~ given, cd to /home
-    if (arguments[1] == NULL || strcmp(arguments[1], "~") == 0) {
-        if(chdir("/home") != 0) {
-            printf("Unknown error, could not change dir");
-            return -1;
-        }
-        return 0;
-    }
-
-    // Self explanatory
-    if (arguments[2] != NULL) {
-        printf("Too many arguments\n");
-        return -1;
-    }
-
-    // Move to any other dir
-    if (chdir(arguments[1]) != 0) {
-        printf("Invalid directory. Please try again.\n");
-        return -1;
-    }
-
-    return 0;
 }

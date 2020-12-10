@@ -1,1 +1,1 @@
-gcc shell.c disk.c partition.c -o ./Binaries/main
+gcc disk.c shell.c -o ./Binaries/main

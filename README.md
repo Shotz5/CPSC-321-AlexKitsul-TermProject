@@ -1,7 +1,8 @@
 # Term Project for CPSC 321
 
-## Problem 1 - Create CFFS Disk Simulator
+> This is not my finest work. I did not find a good method to do the assignment until it was almost too late. I've implmented up to the end of question 2 with the ```make_file``` ```write_file``` and ```delete_file``` commands. To use, run `./compile.sh` and then type `./Binaries/main` while in the src file. This program mostly assumes correct input (plus or minus too many files), and does put correct information in to RAM.
 
-> To test the shell, type the keywords ```disk_write``` and ```disk_read``` to write a block of data to the 'disk' and then return that block of data and write the hex values to console.
+> There is no way to retreive the data once it's been written. The project documentation did not state this was a requirement.
 
-Any feedback on the implementation so far is greatly appreciated :)
+> There is no working directory system. Unfortunately I did not have the time to implement it.
+
